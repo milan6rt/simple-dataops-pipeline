@@ -24,7 +24,7 @@ IF NOT EXISTS (SELECT * FROM customers)
 BEGIN
     INSERT INTO customers (Name, Email)
     VALUES 
-        ('Alice Johnson', 'alice@example.com'),
+        ('Milan Johnson', 'alice@example.com'),
         ('Bob Smith', 'bob@example.com'),
         ('Carol Davis', 'carol@example.com');
     

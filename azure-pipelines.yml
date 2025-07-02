@@ -1,0 +1,86 @@
+# Simple Azure SQL Database Deployment Pipeline
+# Only 2 files: this YAML + SQL script
+
+trigger:
+- main
+
+pool:
+  name: 'Default'  # Your existing Mac agent
+
+variables:
+  sqlServerName: 'sqlserver-dataops-demo-milan.database.windows.net'
+  databaseName: 'db-employees-demo'
+
+jobs:
+- job: DeployCustomersTable
+  displayName: 'Deploy Customers Table'
+  steps:
+  
+  - checkout: self
+    displayName: '📥 Get SQL files from GitHub'
+  
+  - script: |
+      echo "🔍 Files to deploy:"
+      ls -la sql/
+      echo ""
+      echo "📄 SQL Content:"
+      cat sql/create_customers_table.sql
+    displayName: '🔍 Show SQL Content'
+  
+  - script: |
+      echo "📦 Installing pymssql..."
+      pip3 install pymssql
+      echo "✅ Dependencies ready"
+    displayName: '📦 Install Dependencies'
+  
+  - script: |
+      echo "🚀 Deploying SQL changes..."
+      
+      python3 << 'EOF'
+      import pymssql
+      import sys
+      
+      # Connection details
+      server = '$(sqlServerName)'
+      database = '$(databaseName)'
+      username = '$(sqlUsername)'
+      password = '$(sqlPassword)'
+      
+      try:
+          print(f"📡 Connecting to: {server}")
+          print(f"📊 Database: {database}")
+          
+          # Read SQL file
+          with open('sql/create_customers_table.sql', 'r') as file:
+              sql_script = file.read()
+          
+          print("📜 Executing SQL script...")
+          
+          # Connect and execute
+          conn = pymssql.connect(
+              server=server,
+              user=username,
+              password=password,
+              database=database,
+              timeout=30
+          )
+          
+          cursor = conn.cursor()
+          cursor.execute(sql_script)
+          conn.commit()
+          
+          print("✅ SQL script executed successfully!")
+          
+          # Verify the table was created
+          cursor.execute("SELECT COUNT(*) FROM customers")
+          count = cursor.fetchone()[0]
+          print(f"📊 Customers table now has {count} records")
+          
+          conn.close()
+          print("🎉 Deployment completed successfully!")
+          
+      except Exception as e:
+          print(f"❌ Deployment failed: {str(e)}")
+          sys.exit(1)
+      EOF
+    displayName: '🚀 Deploy SQL Changes'

@@ -1,6 +1,5 @@
---test 1
--- Simple customer table creation script
--- This will be executed automatically when changes are pushed to GitHub
+-- Simple customer table update test
+-- Testing pipeline with a simple email update
 
 -- Create customers table if it doesn't exist
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'customers' AND type = 'U')
@@ -12,29 +11,29 @@ BEGIN
         CreatedDate DATETIME DEFAULT GETDATE()
     );
     
-    PRINT 'SUCCESS: customers table created successfully!';
-END
-ELSE
-BEGIN
-    PRINT 'INFO: customers table already exists - no changes needed.';
-END
-
--- Insert sample data if table is empty
-IF NOT EXISTS (SELECT * FROM customers)
-BEGIN
     INSERT INTO customers (Name, Email)
     VALUES 
-        ('Milan Johnson', 'alice@example.com'),
+        ('Alice Johnson', 'alice@example.com'),
         ('Bob Smith', 'bob@example.com'),
         ('Carol Davis', 'carol@example.com');
     
-    PRINT 'SUCCESS: Sample customer data inserted!';
+    PRINT 'SUCCESS: customers table created with initial data!';
 END
 ELSE
 BEGIN
-    PRINT 'INFO: customers table already contains data - skipping insert.';
+    PRINT 'INFO: customers table exists. Applying updates...';
+    
+    -- Simple update: Change Alice's email address
+    UPDATE customers 
+    SET Email = 'alice.johnson.updated@delphime.com'
+    WHERE Name = 'Alice Johnson' AND Email != 'alice.johnson.updated@company.com';
+    
+    IF @@ROWCOUNT > 0
+        PRINT 'SUCCESS: Updated Alice Johnson email address!';
+    ELSE
+        PRINT 'INFO: Alice email already updated or not found.';
 END
 
--- Show results
+-- Show current state
 SELECT COUNT(*) as TotalCustomers FROM customers;
-SELECT TOP 3 * FROM customers ORDER BY CreatedDate DESC;
+SELECT Name, Email FROM customers ORDER BY Name;

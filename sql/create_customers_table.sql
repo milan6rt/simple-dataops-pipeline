@@ -1,3 +1,4 @@
+--test 1
 -- Simple customer table creation script
 -- This will be executed automatically when changes are pushed to GitHub
 

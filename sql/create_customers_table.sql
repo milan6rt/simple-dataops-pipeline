@@ -25,8 +25,8 @@ BEGIN
     
     -- Simple update: Change Alice's email address
     UPDATE customers 
-    SET Email = 'alice.johnson.updated@company.com'
-    WHERE Name = 'Alice Johnson' AND Email != 'alice.johnson.updated@company.com';
+    SET Email = 'alice.johnson.updated@delphi.com'
+    WHERE Name = 'Alice Johnson' AND Email != 'alice.johnson.updated@delphi.com';
     
     IF @@ROWCOUNT > 0
         PRINT 'SUCCESS: Updated Alice Johnson email address!';
